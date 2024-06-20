@@ -1,7 +1,8 @@
-import { Body, Controller, Get, HttpException, Param, Post, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, Param, Patch, Post,Delete, UsePipes, ValidationPipe } from '@nestjs/common';
 import { usersService } from './users.service';
 import { craeteUserDto } from './dto/CreateUser.dto';
 import mongoose  from 'mongoose';
+import { updateUserDto } from './dto/UpdateUser.dto';
 
 export interface User extends Document {
     readonly name: string;
@@ -36,4 +37,26 @@ export class UsersController{
          
     }
 
-}
+    @Patch(':id')
+    @UsePipes(new ValidationPipe())
+    async updateUser(@Param('id')id:string,@Body() updateUserDto: updateUserDto){
+        
+        const isValid = mongoose.Types.ObjectId.isValid(id);
+        if(!isValid) throw new HttpException('InValid Id!', 400);
+        const updateUser = await this.usersSerive.updateUser(id, updateUserDto,);
+        if(!updateUser) throw new HttpException('User is not Found!', 404);
+
+        return updateUser;
+    }
+
+    @Delete(':id')
+    async deleteUser(@Param('id') id:string) {
+        const isValid = mongoose.Types.ObjectId.isValid(id);
+        if(!isValid) throw new HttpException('InValid Id!', 400);
+        const deleteUser = await this.usersSerive.deleteUser(id);
+        if(!deleteUser) throw new HttpException('User is not Found!', 404);        
+        return ;
+
+    }
+
+} 
